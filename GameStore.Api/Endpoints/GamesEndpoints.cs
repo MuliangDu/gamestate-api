@@ -17,20 +17,22 @@ public static class GamesEndpoints
     ];
 
     // extension method to map game endpoints
-    public static WebApplication MapGamesEndpoints(this WebApplication app)
+    public static RouteGroupBuilder MapGamesEndpoints(this WebApplication app)
     {
+        var group = app.MapGroup("games");
+
         // Endpoint to get all games
         app.MapGet("games", () => games);
 
         // Endpoint to get a game by ID
-        app.MapGet("games/{id:int}", (int id) =>
+        group.MapGet("/{id:int}", (int id) =>
         {
             GameDto? game = games.Find(game => game.Id == id);
             return game is null ? Results.NotFound() : Results.Ok(game);
         }).WithName(GetGameEndpointName);
 
         // Endpoint to create a new game
-        app.MapPost("games", (CreateGameDtos createGameDto) =>
+        group.MapPost("/", (CreateGameDtos createGameDto) =>
         {
             var newGame = new GameDto(
                 Id: games.Count + 1,
@@ -44,7 +46,7 @@ public static class GamesEndpoints
             return Results.CreatedAtRoute(GetGameEndpointName, new { id = newGame.Id }, newGame);
         });
 
-        app.MapPut("games/{id:int}", (int id, UpdateGameDtos updateGameDto) =>
+        group.MapPut("/{id:int}", (int id, UpdateGameDtos updateGameDto) =>
         {
             var existingGameId = games.FindIndex(game => game.Id == id);
             if (existingGameId == -1)
@@ -62,12 +64,12 @@ public static class GamesEndpoints
         }
         );
 
-        app.MapDelete("games/{id:int}", (int id) =>
+        group.MapDelete("/{id:int}", (int id) =>
         {
             games.RemoveAll(game => game.Id == id);
             return Results.NoContent();
         }
         );
-        return app;
+        return group;
     }
 }
