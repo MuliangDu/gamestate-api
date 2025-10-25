@@ -44,7 +44,8 @@ public static class GamesEndpoints
 
             games.Add(newGame);
             return Results.CreatedAtRoute(GetGameEndpointName, new { id = newGame.Id }, newGame);
-        });
+        })
+        .WithParameterValidation();
 
         group.MapPut("/{id:int}", (int id, UpdateGameDtos updateGameDto) =>
         {
@@ -62,7 +63,7 @@ public static class GamesEndpoints
             );
             return Results.NoContent();
         }
-        );
+        ).WithParameterValidation();
 
         group.MapDelete("/{id:int}", (int id) =>
         {
